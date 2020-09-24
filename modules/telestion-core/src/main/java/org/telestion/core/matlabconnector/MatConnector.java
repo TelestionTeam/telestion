@@ -37,9 +37,9 @@ public class MatConnector {
         System.out.println("want to close Matlab");
         String k = s.next();
         if (k.equals("no") || k.equals("n")) {
-            mc.close();
+            
         } else {
-
+            mc.close();
         }
     }
 
