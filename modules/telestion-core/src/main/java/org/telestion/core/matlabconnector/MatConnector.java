@@ -1,7 +1,4 @@
-/*
-Author Liam Franssen
-Copyright Liam Franssen
- */
+
 
 package org.telestion.core.matlabconnector;
 
@@ -9,6 +6,10 @@ import com.mathworks.engine.MatlabEngine;
 
 import java.util.Scanner;
 
+/**
+ *@author Liam Franssen
+ *Copyright Liam Franssen
+ */
 
 public class MatConnector {
 
