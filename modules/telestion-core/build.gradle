@@ -11,8 +11,13 @@ application {
     mainClassName = 'org.telestion.core.Main'
 }
 
+repositories {
+    flatDir {
+        dirs 'lib'
+    }
+}
 
-dependencies {
+dependencies {implementation name: 'engine'
     implementation project(':modules:telestion-api')
 
     implementation 'com.google.guava:guava:29.0-jre'
