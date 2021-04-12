@@ -175,12 +175,12 @@ def to_record(msg: Message, output: str = "", package: str = "org.telestion.adap
     new_line = '\n'
     template = f"""package {package};
 
-import org.telestion.protocol.mavlink.annotation.MavField;
-import org.telestion.protocol.mavlink.annotation.MavInfo;
-import org.telestion.protocol.mavlink.annotation.NativeType;\
-{f'{new_line}import org.telestion.protocol.mavlink.annotation.MavArray;' if msg.contains_array() else ''}\
-{f'{new_line}import org.telestion.protocol.mavlink.message.MavlinkMessage;'
-    if package != 'org.telestion.protocol.mavlink.message' else ''}
+import org.telestion.protocol.old_mavlink.annotation.MavField;
+import org.telestion.protocol.old_mavlink.annotation.MavInfo;
+import org.telestion.protocol.old_mavlink.annotation.NativeType;\
+{f'{new_line}import org.telestion.protocol.old_mavlink.annotation.MavArray;' if msg.contains_array() else ''}\
+{f'{new_line}import org.telestion.protocol.old_mavlink.message.MavlinkMessage;'
+    if package != 'org.telestion.protocol.old_mavlink.message' else ''}
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

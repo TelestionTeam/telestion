@@ -1,4 +1,4 @@
-package org.telestion.protocol.mavlink.security;
+package org.telestion.protocol.old_mavlink.security;
 
 /**
  * This class is handling the creation of the X.25 (CRC-16-CCITT) custom checksum for MAVLink.<br>
@@ -9,7 +9,7 @@ package org.telestion.protocol.mavlink.security;
  * implementation</a> for MAVLink.
  *
  * @author Cedric Boes
- * @version 1.0
+ * @version 1.1
  */
 public final class X25Checksum {
 
@@ -53,19 +53,5 @@ public final class X25Checksum {
 			currentCrc = calculate(b, currentCrc);
 		}
 		return currentCrc & 0xffff;
-	}
-
-	/**
-	 * Calculates the CRC X.25-checksum for a given payload array and the right crc-extra extra byte.<br>
-	 *
-	 * @param payload data to calculate the checksum for
-	 * @param crc crc-byte which must be added
-	 * @return checksum for the payload
-	 */
-	public static int calculate(byte[] payload, int crc) {
-		var buffer = new byte[payload.length + 1];
-		System.arraycopy(payload, 0, buffer, 0, payload.length);
-		buffer[payload.length] = (byte) crc;
-		return calculate(buffer);
 	}
 }

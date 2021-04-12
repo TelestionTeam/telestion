@@ -1,8 +1,7 @@
-package org.telestion.protocol.mavlink.annotation;
-
-import org.telestion.protocol.mavlink.message.MavlinkMessage;
+package org.telestion.protocol.old_mavlink.annotation;
 
 import java.lang.annotation.*;
+import org.telestion.protocol.old_mavlink.message.MavlinkMessage;
 
 /**
  * An {@link Annotation} providing more information about a MAVLink-Message.
@@ -19,12 +18,12 @@ public @interface MavInfo {
 	 *
 	 * @return message id
 	 */
-	int id();
+	public int id();
 
 	/**
 	 * The calculated CRC_EXTRA byte for this message.
 	 *
 	 * @return CRC_EXTRA byte for this message
 	 */
-	int crc();
+	public int crc();
 }

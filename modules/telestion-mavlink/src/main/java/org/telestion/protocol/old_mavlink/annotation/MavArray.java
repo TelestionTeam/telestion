@@ -1,8 +1,7 @@
-package org.telestion.protocol.mavlink.annotation;
-
-import org.telestion.protocol.mavlink.message.MavlinkMessage;
+package org.telestion.protocol.old_mavlink.annotation;
 
 import java.lang.annotation.*;
+import org.telestion.protocol.old_mavlink.message.MavlinkMessage;
 
 /**
  * An {@link Annotation} specifying that a MAVLink-Message-Field is an array.<br>
@@ -20,5 +19,5 @@ public @interface MavArray {
 	 *
 	 * @return length of the array
 	 */
-	int length();
+	public int length();
 }

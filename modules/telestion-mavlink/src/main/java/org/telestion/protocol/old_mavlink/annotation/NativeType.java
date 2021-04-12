@@ -1,4 +1,4 @@
-package org.telestion.protocol.mavlink.annotation;
+package org.telestion.protocol.old_mavlink.annotation;
 
 /**
  * Defines all native Types of MAVLink which are supported by this Adapter.
@@ -36,8 +36,7 @@ public enum NativeType {
 	 */
 	INT_64(8, false),
 	/**
-	 * Representation of the uint64_t type for MAVLink.<br>
-	 * As the Java-Long type has a max. limit of {@value Long#MAX_VALUE} this might be exceeded!
+	 * Representation of the uint64_t type for MAVLink.
 	 */
 	UINT_64(8, true),
 	/**
@@ -67,10 +66,10 @@ public enum NativeType {
 	 * Creating a new {@link NativeType}.<br>
 	 * This can only be created by the enum-fields.
 	 *
-	 * @param size     in memory of the new {@link NativeType} [{@link #size}]
-	 * @param unsigned indicates whether a {@link NativeType} is unsigned or not [{@link #unsigned}]
+	 * @param size     in memory of the new {@link NativeType}
+	 * @param unsigned indicates whether a {@link NativeType} is unsigned or not
 	 */
-	NativeType(int size, boolean unsigned) {
+	private NativeType(int size, boolean unsigned) {
 		this.size = size;
 		this.unsigned = unsigned;
 	}
