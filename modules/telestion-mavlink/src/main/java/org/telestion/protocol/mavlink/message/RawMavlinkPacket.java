@@ -1,6 +1,7 @@
 package org.telestion.protocol.mavlink.message;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.telestion.api.message.JsonMessage;
 
 /**
  * This will be published on the bus, if the {@link org.telestion.protocol.mavlink.Validator Validator} detects
@@ -15,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @see org.telestion.protocol.mavlink.Validator
  */
 public record RawMavlinkPacket(@JsonProperty byte[] raw,
-							   @JsonProperty boolean success) {
+							   @JsonProperty boolean success) implements JsonMessage {
 	@SuppressWarnings("unused")
 	private RawMavlinkPacket() {
 		this(null, false);

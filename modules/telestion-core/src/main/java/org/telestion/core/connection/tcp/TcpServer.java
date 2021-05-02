@@ -69,7 +69,7 @@ public final class TcpServer extends AbstractVerticle {
 		if (server != null) {
 			activeCons.values().forEach(net -> net.close(stopPromise));
 			logger.info("Closing Server on {}:{}", config.hostAddress(), config.port());
-			server.close(stopPromise);
+			server.close();
 		}
 		stopPromise.complete();
 	}

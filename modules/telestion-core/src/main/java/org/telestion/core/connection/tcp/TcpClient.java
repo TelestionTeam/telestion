@@ -14,6 +14,7 @@ import org.telestion.api.message.JsonMessage;
 import org.telestion.core.connection.ConnectionData;
 import org.telestion.core.util.Tuple;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -66,11 +67,10 @@ public final class TcpClient extends AbstractVerticle {
 
 	private void handleDispatchedMsg(TcpData tcpData) {
 		var details = tcpData.details();
-		var socket = activeClients.get(new Tuple<>(details.ip(), details.port()));
 
 		// Checks if socket already exists, if not connects to Server and if successful sends data asynchronously
 		vertx.executeBlocking(handler -> {
-			if (socket == null) {
+			if (!activeClients.containsKey(new Tuple<>(details.ip(), details.port()))) {
 				currentClient.connect(details.port(), details.ip(), h -> {
 					if (h.succeeded()) {
 						onConnected(h.result());
@@ -87,7 +87,7 @@ public final class TcpClient extends AbstractVerticle {
 		}, handler -> {
 			if (handler.succeeded()) {
 				logger.debug("Sending data to {}:{}", details.ip(), details.port());
-				socket.write(Buffer.buffer(tcpData.data()));
+				activeClients.get(new Tuple<>(details.ip(), details.port())).write(Buffer.buffer(tcpData.data()));
 			} else {
 				logger.warn("Due to an error the packet to {}:{} will be dropped", details.ip(), details.port());
 			}

@@ -34,10 +34,10 @@ public final class X25Checksum {
 	 * @return checksum composed from a prior checksum and a byte of data
 	 */
 	public static int calculate(int data, int currentCrc) {
-		data ^= (byte) (currentCrc & 0xff);
-		data ^= (data << 4);
+		data = data ^ (currentCrc & 0xff);
+		data ^= (data << 4) & 0xff;
 		data &= 0xff;
-		return ((currentCrc >> 8) ^ (data << 8) ^ (data << 3) ^ (data >> 4)) & 0xffff;
+		return (((currentCrc >> 8) ^ (data << 8) ^ (data << 3) ^ (data >> 4))) & 0xffff;
 	}
 
 	/**

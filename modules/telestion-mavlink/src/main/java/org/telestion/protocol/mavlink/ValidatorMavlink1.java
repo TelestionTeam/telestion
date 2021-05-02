@@ -5,8 +5,8 @@ import io.vertx.core.eventbus.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telestion.api.message.JsonMessage;
+import org.telestion.core.connection.ConnectionData;
 import org.telestion.protocol.mavlink.annotation.MavInfo;
-import org.telestion.protocol.mavlink.dummy.NetPacket;
 import org.telestion.protocol.mavlink.message.Mavlink1Information;
 import org.telestion.protocol.mavlink.message.RawMavlinkPacket;
 import org.telestion.protocol.mavlink.message.internal.ValidatedMavlinkPacket;
@@ -60,8 +60,8 @@ public final class ValidatorMavlink1 extends Validator {
 
 	@Override
 	public final void handleMessage(Message<?> msg) {
-		JsonMessage.on(NetPacket.class, msg, packet -> {
-			var raw = packet.raw();
+		JsonMessage.on(ConnectionData.class, msg, packet -> {
+			var raw = packet.rawData();
 
 			// Checking raw packet constraints and if the packet is a MAVLinkV1 packet
 			if (!(raw != null && raw.length > 7 && raw[0] == (byte) 0xFE)) {
@@ -86,7 +86,7 @@ public final class ValidatorMavlink1 extends Validator {
 			var payload = Arrays.copyOfRange(raw, 6, 6 + length);
 			var checksum = Arrays.copyOfRange(raw, 6 + length, 6 + length + 2);
 
-			var clazz = MessageIndex.get(msgId);
+			var clazz = MessageIndex.get(msgId); // todo: null check
 			if (!clazz.isAnnotationPresent(MavInfo.class)) {
 				logger.warn("Annotation missing for {} (MavlinkV1)!", clazz.getName());
 				vertx.eventBus().publish(getPacketOutAddress(), new RawMavlinkPacket(raw, false));

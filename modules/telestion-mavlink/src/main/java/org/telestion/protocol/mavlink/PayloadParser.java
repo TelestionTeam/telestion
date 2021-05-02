@@ -65,7 +65,7 @@ public final class PayloadParser extends AbstractVerticle {
 							.map(RecordComponent::getType).toArray(Class[]::new));
 
 					var instance = constructor.newInstance(objs);
-					vertx.eventBus().publish(getOutAddress(), instance);
+					vertx.eventBus().publish(getOutAddress(), instance.json());
 				} catch(Exception e) {
 					logger.error("Parsing packet payload failed due to an unexpected error!", e);
 				}

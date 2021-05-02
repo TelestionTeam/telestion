@@ -6,8 +6,8 @@ import io.vertx.core.eventbus.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telestion.api.message.JsonMessage;
+import org.telestion.core.connection.ConnectionData;
 import org.telestion.protocol.mavlink.annotation.MavInfo;
-import org.telestion.protocol.mavlink.dummy.NetPacket;
 import org.telestion.protocol.mavlink.message.Mavlink2Information;
 import org.telestion.protocol.mavlink.message.RawMavlinkPacket;
 import org.telestion.protocol.mavlink.message.internal.ValidatedMavlinkPacket;
@@ -50,7 +50,7 @@ public final class ValidatorMavlink2 extends Validator {
 	 * @param config {@link Configuration}
 	 */
 	public ValidatorMavlink2(Configuration config) {
-		this(config.parserInAddress, config.inAddress, config.packetOutAddress, config.password);
+		this(config.inAddress(), config.packetOutAddress(), config.parserInAddress(), config.password);
 	}
 
 	/**
@@ -66,8 +66,8 @@ public final class ValidatorMavlink2 extends Validator {
 
 	@Override
 	public final void handleMessage(Message<?> msg) {
-		JsonMessage.on(NetPacket.class, msg, packet -> {
-			var raw = packet.raw();
+		JsonMessage.on(ConnectionData.class, msg, packet -> {
+			var raw = packet.rawData();
 
 			// Checking raw packet constraints and if the packet is a MAVLinkV2 packet
 			if (!(raw != null && raw.length > 11 && raw[0] == (byte) 0xFD)) {
@@ -90,14 +90,14 @@ public final class ValidatorMavlink2 extends Validator {
 			var seq = raw[4];
 			var sysId = raw[5];
 			var compId = raw[6];
-			var msgId = raw[7] << 16 + raw[8] << 8 + raw[9];
+			var msgId = (((int) raw[9]) << 16) + (((int) raw[8]) << 8) + (int) raw[7]; // todo: null check
 			var payload = Arrays.copyOfRange(raw, 10, 10 + length);
 			var checksum = Arrays.copyOfRange(raw, 10 + length, 10 + length + 2);
 
 			var clazz = MessageIndex.get(msgId);
 			if (!clazz.isAnnotationPresent(MavInfo.class)) {
 				logger.warn("Annotation missing for {} (MavlinkV2)!", clazz.getName());
-				vertx.eventBus().publish(getPacketOutAddress(), new RawMavlinkPacket(raw, false));
+				vertx.eventBus().publish(getPacketOutAddress(), new RawMavlinkPacket(raw, false).json());
 				return;
 			}
 			var annotation = clazz.getAnnotation(MavInfo.class);
@@ -106,7 +106,7 @@ public final class ValidatorMavlink2 extends Validator {
 			if (incompatFlags == 0x01) {
 				if (raw.length >= 10 + length + 2 + 13) {
 					logger.info("Broken MavlinkV2-packet received!");
-					vertx.eventBus().publish(getPacketOutAddress(), new RawMavlinkPacket(raw, false));
+					vertx.eventBus().publish(getPacketOutAddress(), new RawMavlinkPacket(raw, false).json());
 					return;
 				}
 
@@ -126,21 +126,21 @@ public final class ValidatorMavlink2 extends Validator {
 							"with signatures will be rejected!", e);
 				}
 				if (!state) {
-					vertx.eventBus().publish(getPacketOutAddress(), new RawMavlinkPacket(raw, false));
+					vertx.eventBus().publish(getPacketOutAddress(), new RawMavlinkPacket(raw, false).json());
 					return;
 				}
 			}
 
-			if (X25Checksum.calculate(payload, annotation.crc()) != checksum[0] << 8 + checksum[1]) {
+			if (X25Checksum.calculate(Arrays.copyOfRange(raw, 0, length + 10), annotation.crc()) != (checksum[0] >> 8) + checksum[1]) {
 				logger.info("Checksum of received MavlinkV2-packet invalid!");
-				vertx.eventBus().publish(getPacketOutAddress(), new RawMavlinkPacket(raw, false));
-				return;
+				//vertx.eventBus().publish(getPacketOutAddress(), new RawMavlinkPacket(raw, false).json());
+				//return;
 			}
 
-			vertx.eventBus().publish(getPacketOutAddress(), new RawMavlinkPacket(raw, true));
+			vertx.eventBus().publish(getPacketOutAddress(), new RawMavlinkPacket(raw, true).json());
 
 			var mavInfo = new Mavlink2Information(incompatFlags, compatFlags, seq, sysId, compId);
-			vertx.eventBus().publish(getParserInAddress(), new ValidatedMavlinkPacket(payload, clazz, mavInfo));
+			vertx.eventBus().publish(getParserInAddress(), new ValidatedMavlinkPacket(payload, clazz, mavInfo).json());
 		});
 	}
 
