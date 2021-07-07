@@ -40,7 +40,6 @@ public final class DataService extends AbstractVerticle {
 	/**
 	 * This constructor supplies default options.
 	 *
-	 * @param dataTypes				List of all full class names of the data types
 	 * @param dataOperationMap		Map of String->DataOperation for incoming dataRequests
 	 */
 	public DataService(Map<String, DataOperation> dataOperationMap) {
@@ -91,30 +90,24 @@ public final class DataService extends AbstractVerticle {
 	 * @param resultHandler		Handles the request to the underlying database. Can be failed or succeeded.
 	 */
 	private void dataRequestDispatcher(DataRequest request, Handler<AsyncResult<JsonObject>> resultHandler) {
-		// TODO: If className is empty, check if query exists and just pass the query to the DatabaseClient
-		try {
-			var dataType = Class.forName(request.className());
-			if (request.operation().isEmpty()) {
-				this.fetchLatestData(dataType, request.query(), res -> {
-					if (res.failed()) {
-						resultHandler.handle(Future.failedFuture(res.cause().getMessage()));
-						return;
-					}
-					resultHandler.handle(Future.succeededFuture(res.result()));
-				});
-			} else {
-				var dataOperation = new DataOperation(new JsonObject(), request.operationParams());
-				this.fetchLatestData(dataType, request.query(), res -> {
-					if (res.failed()) {
-						resultHandler.handle(Future.failedFuture(res.cause().getMessage()));
-						return;
-					}
-					dataOperation.data().put("data", res.result());
-				});
-				this.applyManipulation(request.operation(), dataOperation, resultHandler);
-			}
-		} catch (ClassNotFoundException e) {
-			logger.error("ClassNotFoundException: {}", e.getMessage());
+		if (request.operation().isEmpty()) {
+			this.fetchLatestData(request.collection(), request.query(), res -> {
+				if (res.failed()) {
+					resultHandler.handle(Future.failedFuture(res.cause().getMessage()));
+					return;
+				}
+				resultHandler.handle(Future.succeededFuture(res.result()));
+			});
+		} else {
+			var dataOperation = new DataOperation(new JsonObject(), request.operationParams());
+			this.fetchLatestData(request.collection(), request.query(), res -> {
+				if (res.failed()) {
+					resultHandler.handle(Future.failedFuture(res.cause().getMessage()));
+					return;
+				}
+				dataOperation.data().put("data", res.result());
+			});
+			this.applyManipulation(request.operation(), dataOperation, resultHandler);
 		}
 	}
 
@@ -142,13 +135,13 @@ public final class DataService extends AbstractVerticle {
 	/**
 	 * Method to fetch the latest data of a specified data type.
 	 *
-	 * @param dataType			Determines which data type should be fetched.
+	 * @param collection		Determines from which collection data should be fetched.
 	 * @param query				MongoDB query, can be empty JsonObject if no specific query is needed.
 	 * @param resultHandler		Handles the request to the underlying database. Can be failed or succeeded.
 	 */
-	private void fetchLatestData(Class<?> dataType, JsonObject query,
+	private void fetchLatestData(String collection, String query,
 			Handler<AsyncResult<JsonObject>> resultHandler) {
-		DbRequest dbRequest = new DbRequest(dataType, query);
+		DbRequest dbRequest = new DbRequest(collection, query);
 		this.requestResultHandler(dbFind, dbRequest, resultHandler);
 	}
 

@@ -11,20 +11,32 @@ import org.slf4j.LoggerFactory;
 import de.wuespace.telestion.api.message.JsonMessage;
 import de.wuespace.telestion.api.config.Config;
 
+/**
+ * Listener that collects all incoming data configured in listeningAddresses and redirects them to be saved to the
+ * MongoDatabaseService.
+ */
 public final class DataListener extends AbstractVerticle {
 	private final Configuration forcedConfig;
 	private Configuration config;
 
 	private final Logger logger = LoggerFactory.getLogger(DataListener.class);
 
-	private final String save = Address.incoming(DataService.class, "save");
+	private final String save = Address.incoming(MongoDatabaseService.class, "save");
 
-	public DataListener() {
-		this.forcedConfig = null;
-	}
-
+	/**
+	 * This constructor supplies default options.
+	 *
+	 * @param listeningAddresses	List of addresses that should be saved
+	 */
 	public DataListener(List<String> listeningAddresses) {
 		this.forcedConfig = new Configuration(listeningAddresses);
+	}
+
+	/**
+	 * If this constructor is used, settings have to be specified in the config file.
+	 */
+	public DataListener() {
+		this.forcedConfig = null;
 	}
 
 	@Override
@@ -34,6 +46,9 @@ public final class DataListener extends AbstractVerticle {
 		startPromise.complete();
 	}
 
+	/**
+	 * Function to register consumers to the eventbus.
+	 */
 	private void registerConsumers() {
 		config.listeningAddresses().forEach(address -> {
 			vertx.eventBus().consumer(address, document -> {
